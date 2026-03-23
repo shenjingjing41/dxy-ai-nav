@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TDDC 设计团队 · AI 提效教程导航</title>
+  <style>
+    :root {
+      --primary: #5b6af0;
+      --primary-light: #eef0ff;
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1a1d2e;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 2px 14px rgba(91,106,240,0.09);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #4f5bd5 0%, #7c3aed 100%);
+      color: #fff; padding: 44px 40px 36px; text-align: center;
+    }
+    header .badge {
+      display: inline-block; background: rgba(255,255,255,0.2);
+      border-radius: 20px; padding: 4px 14px; font-size: 12px;
+      letter-spacing: 1px; margin-bottom: 14px;
+    }
+    header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    header p { font-size: 14px; opacity: .85; max-width: 520px; margin: 0 auto 24px; }
+    .stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .stat .num { font-size: 24px; font-weight: 700; }
+    .stat .label { font-size: 11px; opacity: .8; }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    .toolbar-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 40px; flex-wrap: wrap;
+    }
+    .toolbar-row + .toolbar-row { padding-top: 12px; padding-bottom: 14px; border-top: 1px solid var(--border); }
+    .row-label {
+      font-size: 11px; color: var(--muted); font-weight: 700;
+      letter-spacing: .5px; white-space: nowrap; min-width: 36px; text-transform: none;
+    }
+
+    /* search */
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
+    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    #search {
+      width: 100%; padding: 9px 12px 9px 36px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 14px; outline: none; transition: border-color .2s;
+      background: var(--bg); color: var(--text);
+    }
+    #search:focus { border-color: var(--primary); background: #fff; }
+
+    /* chips */
+    .chip-group { display: flex; gap: 7px; flex-wrap: wrap; }
+    .chip {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: transparent;
+      font-size: 13px; cursor: pointer; color: var(--muted);
+      transition: all .15s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+
+    /* scene chip colors */
+    .chip[data-scene="kv"].active      { background:#7c3aed; border-color:#7c3aed; }
+    .chip[data-scene="portrait"].active{ background:#be185d; border-color:#be185d; }
+    .chip[data-scene="arch"].active    { background:#b45309; border-color:#b45309; }
+    .chip[data-scene="typo"].active    { background:#0369a1; border-color:#0369a1; }
+    .chip[data-scene="ppt"].active     { background:#0891b2; border-color:#0891b2; }
+    .chip[data-scene="video"].active   { background:#dc2626; border-color:#dc2626; }
+    .chip[data-scene="prompt"].active  { background:#7c3aed; border-color:#7c3aed; }
+    .chip[data-scene="research"].active{ background:#059669; border-color:#059669; }
+    .chip[data-scene="table"].active   { background:#0d9488; border-color:#0d9488; }
+    .chip[data-scene="motion"].active  { background:#9333ea; border-color:#9333ea; }
+    .chip[data-scene="batch"].active   { background:#d97706; border-color:#d97706; }
+    .chip[data-scene="dev"].active     { background:#374151; border-color:#374151; }
+
+    /* tool chip colors */
+    .chip[data-tool="即梦AI"].active     { background:#ea580c; border-color:#ea580c; }
+    .chip[data-tool="Midjourney"].active { background:#7c3aed; border-color:#7c3aed; }
+    .chip[data-tool="ComfyUI"].active    { background:#1d4ed8; border-color:#1d4ed8; }
+    .chip[data-tool="LibLib"].active     { background:#16a34a; border-color:#16a34a; }
+    .chip[data-tool="GPT-4o"].active     { background:#0891b2; border-color:#0891b2; }
+    .chip[data-tool="DeepSeek"].active   { background:#0e7490; border-color:#0e7490; }
+    .chip[data-tool="Figma"].active      { background:#0d9488; border-color:#0d9488; }
+    .chip[data-tool="Figma插件"].active  { background:#047857; border-color:#047857; }
+    .chip[data-tool="Figma Buzz"].active { background:#15803d; border-color:#15803d; }
+    .chip[data-tool="FigJam"].active     { background:#065f46; border-color:#065f46; }
+    .chip[data-tool="NoteBookLM"].active { background:#b45309; border-color:#b45309; }
+    .chip[data-tool="飞书"].active       { background:#1d4ed8; border-color:#1d4ed8; }
+    .chip[data-tool="通义"].active       { background:#c2410c; border-color:#c2410c; }
+    .chip[data-tool="扣子"].active       { background:#7e22ce; border-color:#7e22ce; }
+    .chip[data-tool="Gemini"].active     { background:#1a73e8; border-color:#1a73e8; }
+    .chip[data-tool="Skill"].active      { background:#9333ea; border-color:#9333ea; }
+    .chip[data-tool="Claude"].active     { background:#d97706; border-color:#d97706; }
+
+    .count-badge { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* ── MAIN ── */
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 36px 60px; }
+
+    .section { margin-bottom: 44px; }
+    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .section-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .section-title { font-size: 16px; font-weight: 700; }
+    .section-count { background: var(--primary-light); color: var(--primary); border-radius: 12px; padding: 2px 9px; font-size: 11px; font-weight: 600; }
+    .section-link { margin-left: auto; font-size: 12px; color: var(--primary); text-decoration: none; }
+    .section-link:hover { text-decoration: underline; }
+
+    /* ── CARDS ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); gap: 11px; }
+
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      border: 1.5px solid var(--border); padding: 14px 16px;
+      transition: all .18s; text-decoration: none;
+      display: flex; flex-direction: column; gap: 9px; position: relative;
+    }
+    .card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.45; padding-right: 14px; }
+
+    /* pill rows */
+    .pill-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+
+    /* scene pill */
+    .spill {
+      border-radius: 4px; padding: 1px 6px;
+      font-size: 10px; font-weight: 700; white-space: nowrap;
+      letter-spacing: .2px;
+    }
+    .spill.kv      { background:#f5f3ff; color:#7c3aed; }
+    .spill.portrait{ background:#fdf2f8; color:#be185d; }
+    .spill.arch    { background:#fffbeb; color:#b45309; }
+    .spill.typo    { background:#eff6ff; color:#0369a1; }
+    .spill.ppt     { background:#ecfeff; color:#0891b2; }
+    .spill.video   { background:#fff1f2; color:#be123c; }
+    .spill.prompt  { background:#faf5ff; color:#7c3aed; }
+    .spill.research{ background:#f0fdf4; color:#059669; }
+    .spill.table   { background:#f0fdfa; color:#0d9488; }
+    .spill.motion  { background:#fdf4ff; color:#9333ea; }
+    .spill.batch   { background:#fffbeb; color:#d97706; }
+    .spill.dev     { background:#f3f4f6; color:#374151; }
+
+    /* tool pill */
+    .tpill { border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 600; white-space: nowrap; background:#f0f1fe; color:#4f5bd5; }
+    .tpill[data-t="即梦AI"]     { background:#fff7ed; color:#c2410c; }
+    .tpill[data-t="Midjourney"] { background:#f5f3ff; color:#7c3aed; }
+    .tpill[data-t="ComfyUI"]    { background:#eff6ff; color:#1d4ed8; }
+    .tpill[data-t="LibLib"]     { background:#f0fdf4; color:#15803d; }
+    .tpill[data-t="GPT-4o"]     { background:#ecfeff; color:#0e7490; }
+    .tpill[data-t="Nano Banana"]{ background:#fdf4ff; color:#9333ea; }
+    .tpill[data-t="A1.ART"]     { background:#fef9c3; color:#854d0e; }
+    .tpill[data-t="vectorizer"] { background:#f0fdfa; color:#0f766e; }
+    .tpill[data-t="InDesign"]   { background:#fdf2f8; color:#9d174d; }
+    .tpill[data-t="AnyGen"]     { background:#f0f1fe; color:#4338ca; }
+    .tpill[data-t="DeepSeek"]   { background:#ecfeff; color:#0891b2; }
+    .tpill[data-t="Figma"]      { background:#f0fdf4; color:#0d9488; }
+    .tpill[data-t="Figma Buzz"] { background:#d1fae5; color:#065f46; }
+    .tpill[data-t="FigJam"]     { background:#dcfce7; color:#15803d; }
+    .tpill[data-t="Figma插件"]  { background:#ecfdf5; color:#047857; }
+    .tpill[data-t="NoteBookLM"] { background:#fffbeb; color:#b45309; }
+    .tpill[data-t="Gemini"]     { background:#eff6ff; color:#1a73e8; }
+    .tpill[data-t="飞书"]       { background:#eff6ff; color:#1d4ed8; }
+    .tpill[data-t="通义"]       { background:#fff7ed; color:#c2410c; }
+    .tpill[data-t="扣子"]       { background:#faf5ff; color:#7e22ce; }
+    .tpill[data-t="Jitter"]     { background:#fdf2f8; color:#be185d; }
+    .tpill[data-t="Lottie"]     { background:#fce7f3; color:#9d174d; }
+    .tpill[data-t="AE"]         { background:#f5f3ff; color:#6d28d9; }
+    .tpill[data-t="Skill"]      { background:#faf5ff; color:#9333ea; }
+    .tpill[data-t="Claude"]     { background:#fffbeb; color:#d97706; }
+    .tpill[data-t="Pencil"]     { background:#f0f9ff; color:#0369a1; }
+    .tpill[data-t="VibeCoding"] { background:#fef3c7; color:#92400e; }
+
+    .divider { width: 1px; height: 12px; background: var(--border); margin: 0 2px; }
+
+    .card-arrow { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: var(--border); font-size: 14px; transition: color .18s; }
+    .card:hover .card-arrow { color: var(--primary); }
+
+    .card.hidden, .section.hidden { display: none; }
+
+    #empty { display: none; text-align: center; padding: 60px 20px; color: var(--muted); }
+    #empty p { font-size: 14px; margin-top: 12px; }
+
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); }
+
+    @media (max-width: 640px) {
+      header { padding: 28px 16px; }
+      .toolbar-row { padding: 9px 14px; }
+      main { padding: 16px 12px 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="badge">TDDC 设计团队</div>
+  <h1>🚀 AI 提效教程导航</h1>
+  <p>汇聚团队沉淀的 AI 工具教程与提效经验，按场景快速找到你需要的内容。</p>
+  <div class="stats">
+    <div class="stat"><div class="num">5</div><div class="label">大分类</div></div>
+    <div class="stat"><div class="num">86</div><div class="label">教程</div></div>
+    <div class="stat"><div class="num">12</div><div class="label">工作场景</div></div>
+    <div class="stat"><div class="num">22</div><div class="label">AI 工具</div></div>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+
+  <!-- ROW 1: 搜索 + 计数 -->
+  <div class="toolbar-row">
+    <div class="search-wrap">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input id="search" type="search" placeholder="搜索关键词、工具、场景…" />
+    </div>
+    <div class="count-badge" id="count-badge">共 58 条</div>
+  </div>
+
+  <!-- ROW 2: 场景筛选 -->
+  <div class="toolbar-row">
+    <span class="row-label">场景</span>
+    <div class="chip-group" id="scene-chips">
+      <button class="chip" data-scene="batch">⚡ 批量提效<small style="opacity:.5;margin-left:3px">32</small></button>
+      <button class="chip" data-scene="kv">🖼️ 主视觉 / KV<small style="opacity:.5;margin-left:3px">17</small></button>
+      <button class="chip" data-scene="dev">🛠️ 插件 / 开发<small style="opacity:.5;margin-left:3px">16</small></button>
+      <button class="chip" data-scene="table">📋 表格 / 数据<small style="opacity:.5;margin-left:3px">10</small></button>
+      <button class="chip" data-scene="video">🎬 视频 / 脚本<small style="opacity:.5;margin-left:3px">9</small></button>
+      <button class="chip" data-scene="prompt">✨ 创意生图提示词<small style="opacity:.5;margin-left:3px">9</small></button>
+      <button class="chip" data-scene="typo">🔤 字体 / 排版<small style="opacity:.5;margin-left:3px">7</small></button>
+      <button class="chip" data-scene="research">👥 用户研究<small style="opacity:.5;margin-left:3px">6</small></button>
+      <button class="chip" data-scene="ppt">📊 PPT / 演示<small style="opacity:.5;margin-left:3px">5</small></button>
+      <button class="chip" data-scene="portrait">🧑 人像处理<small style="opacity:.5;margin-left:3px">4</small></button>
+      <button class="chip" data-scene="motion">🎞️ 动效设计<small style="opacity:.5;margin-left:3px">3</small></button>
+      <button class="chip" data-scene="arch">🏗️ 建筑视觉<small style="opacity:.5;margin-left:3px">2</small></button>
+    </div>
+  </div>
+
+  <!-- ROW 3: 工具筛选 -->
+  <div class="toolbar-row">
+    <span class="row-label">工具</span>
+    <div class="chip-group" id="tool-chips">
+      <button class="chip" data-tool="Figma">Figma<small style="opacity:.5;margin-left:3px">48</small></button>
+      <button class="chip" data-tool="Figma插件">Figma 插件<small style="opacity:.5;margin-left:3px">38</small></button>
+      <button class="chip" data-tool="即梦AI">即梦AI<small style="opacity:.5;margin-left:3px">4</small></button>
+      <button class="chip" data-tool="LibLib">LibLib<small style="opacity:.5;margin-left:3px">4</small></button>
+      <button class="chip" data-tool="DeepSeek">DeepSeek<small style="opacity:.5;margin-left:3px">4</small></button>
+      <button class="chip" data-tool="Skill">Skill 自动化<small style="opacity:.5;margin-left:3px">3</small></button>
+      <button class="chip" data-tool="飞书">飞书<small style="opacity:.5;margin-left:3px">2</small></button>
+      <button class="chip" data-tool="NoteBookLM">NoteBookLM<small style="opacity:.5;margin-left:3px">2</small></button>
+      <button class="chip" data-tool="Midjourney">Midjourney<small style="opacity:.5;margin-left:3px">2</small></button>
+      <button class="chip" data-tool="Figma Buzz">Figma Buzz<small style="opacity:.5;margin-left:3px">2</small></button>
+      <button class="chip" data-tool="ComfyUI">ComfyUI<small style="opacity:.5;margin-left:3px">2</small></button>
+      <button class="chip" data-tool="GPT-4o">GPT-4o<small style="opacity:.5;margin-left:3px">1</small></button>
+      <button class="chip" data-tool="Gemini">Gemini<small style="opacity:.5;margin-left:3px">1</small></button>
+      <button class="chip" data-tool="扣子">扣子<small style="opacity:.5;margin-left:3px">1</small></button>
+      <button class="chip" data-tool="通义">通义<small style="opacity:.5;margin-left:3px">1</small></button>
+      <button class="chip" data-tool="FigJam">FigJam<small style="opacity:.5;margin-left:3px">1</small></button>
+      <button class="chip" data-tool="Claude">Claude<small style="opacity:.5;margin-left:3px">2</small></button>
+      <button class="chip" data-tool="Pencil">Pencil<small style="opacity:.5;margin-left:3px">1</small></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ① AI 视觉教程 -->
+  <section class="section" data-section="visual">
+    <div class="section-header">
+      <div class="section-icon" style="background:#eef0ff">🎨</div>
+      <div class="section-title">AI 视觉教程</div>
+      <span class="section-count">20 篇</span>
+      <a class="section-link" href="https://wiki.dxy.net/pages/viewpage.action?pageId=341624260" target="_blank">查看原始目录 →</a>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" data-cat="visual" data-tools="ComfyUI LibLib" data-scenes="portrait batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341616308" target="_blank">
+        <div class="card-title">ComfyUI：主播或嘉宾人物换装设计</div>
+        <div class="pill-row">
+          <span class="spill portrait">人像处理</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="ComfyUI">ComfyUI</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="即梦AI" data-scenes="arch kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341618250" target="_blank">
+        <div class="card-title">即梦AI：医院建筑海报创意设计</div>
+        <div class="pill-row">
+          <span class="spill arch">建筑视觉</span>
+          <span class="spill kv">主视觉/KV</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="即梦AI">即梦AI</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="LibLib" data-scenes="arch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341617929" target="_blank">
+        <div class="card-title">夸克 + LibLib：医院建筑插画设计</div>
+        <div class="pill-row">
+          <span class="spill arch">建筑视觉</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="LibLib">LibLib</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="Midjourney" data-scenes="kv prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341618572" target="_blank">
+        <div class="card-title">Midjourney + 可灵AI：主视觉垫图创意设计</div>
+        <div class="pill-row">
+          <span class="spill kv">主视觉/KV</span>
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Midjourney">Midjourney</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="Midjourney" data-scenes="kv prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=338326558" target="_blank">
+        <div class="card-title">Midjourney：主视觉创意 -sref 实用参数</div>
+        <div class="pill-row">
+          <span class="spill kv">主视觉/KV</span>
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Midjourney">Midjourney</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="即梦AI LibLib" data-scenes="kv prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341610383" target="_blank">
+        <div class="card-title">即梦AI + LibLib：科技风主图形设计</div>
+        <div class="pill-row">
+          <span class="spill kv">主视觉/KV</span>
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="即梦AI">即梦AI</span>
+          <span class="tpill" data-t="LibLib">LibLib</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="即梦AI" data-scenes="typo"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341624677" target="_blank">
+        <div class="card-title">即梦AI：艺术字体一键生成</div>
+        <div class="pill-row">
+          <span class="spill typo">字体/排版</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="即梦AI">即梦AI</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="LibLib ComfyUI" data-scenes="portrait batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341631213" target="_blank">
+        <div class="card-title">LibLib：comfyUI 嘉宾人像高清 & 放大</div>
+        <div class="pill-row">
+          <span class="spill portrait">人像处理</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="LibLib">LibLib</span>
+          <span class="tpill" data-t="ComfyUI">ComfyUI</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="GPT-4o" data-scenes="prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=344887732" target="_blank">
+        <div class="card-title">GPT-4o：对话式生图</div>
+        <div class="pill-row">
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="GPT-4o">GPT-4o</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="A1.ART" data-scenes="portrait"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=348260076" target="_blank">
+        <div class="card-title">A1.ART：一键处理专家照片</div>
+        <div class="pill-row">
+          <span class="spill portrait">人像处理</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="A1.ART">A1.ART</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=348260502" target="_blank">
+        <div class="card-title">AI 工具集合：常用快速处理图片</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=348269364" target="_blank">
+        <div class="card-title">用 AI 工具快速生成医疗学术风格 KV</div>
+        <div class="pill-row">
+          <span class="spill kv">主视觉/KV</span>
+          <span class="spill prompt">创意生图提示词</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="Nano Banana" data-scenes="prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=355110815" target="_blank">
+        <div class="card-title">Nano Banana：AI 图像生成和编辑模型</div>
+        <div class="pill-row">
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Nano Banana">Nano Banana</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="vectorizer" data-scenes="batch typo"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=355119162" target="_blank">
+        <div class="card-title">线稿 / 平面转矢量工具：vectorizer.ai</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+          <span class="spill typo">字体/排版</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="vectorizer">vectorizer.ai</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="即梦AI" data-scenes="prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=361449050" target="_blank">
+        <div class="card-title">即梦图片 4.1 模型提示词手册</div>
+        <div class="pill-row">
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="即梦AI">即梦AI</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="InDesign" data-scenes="typo"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=361461584" target="_blank">
+        <div class="card-title">InDesign：排版教程与提效方案</div>
+        <div class="pill-row">
+          <span class="spill typo">字体/排版</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="InDesign">InDesign</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="" data-scenes="kv batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=361462232" target="_blank">
+        <div class="card-title">人才商业项目主视觉 AI 提效合集</div>
+        <div class="pill-row">
+          <span class="spill kv">主视觉/KV</span>
+          <span class="spill batch">批量提效</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="AnyGen" data-scenes="ppt batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364577893" target="_blank">
+        <div class="card-title">AnyGen：延续原有 PPT 风格，自动排版内容</div>
+        <div class="pill-row">
+          <span class="spill ppt">PPT/演示</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="AnyGen">AnyGen</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="NoteBookLM" data-scenes="ppt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364577874" target="_blank">
+        <div class="card-title">NoteBookLM：快速生成 / 美化演示文稿</div>
+        <div class="pill-row">
+          <span class="spill ppt">PPT/演示</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="NoteBookLM">NoteBookLM</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="visual" data-tools="Gemini" data-scenes="ppt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367921089" target="_blank">
+        <div class="card-title">Gemini Canvas：PPT 美化与生成</div>
+        <div class="pill-row">
+          <span class="spill ppt">PPT/演示</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Gemini">Gemini</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+
+    </div>
+  </section>
+
+  <!-- ② AI 视频教程 -->
+  <section class="section" data-section="video">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fff7ed">🎬</div>
+      <div class="section-title">AI 视频教程</div>
+      <span class="section-count">9 篇</span>
+      <a class="section-link" href="https://wiki.dxy.net/pages/viewpage.action?pageId=341624257" target="_blank">查看原始目录 →</a>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" data-cat="video" data-tools="DeepSeek 飞书" data-scenes="video"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341623113" target="_blank">
+        <div class="card-title">Deepseek + 飞书：高效创作短视频脚本</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="DeepSeek">DeepSeek</span>
+          <span class="tpill" data-t="飞书">飞书</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="" data-scenes="video"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=338326681" target="_blank">
+        <div class="card-title">AI 口播：视频口气标识与快速剪辑</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="" data-scenes="video prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=338315517" target="_blank">
+        <div class="card-title">AI 视频素材：生成探索与提效</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <span class="spill prompt">创意生图提示词</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="DeepSeek" data-scenes="video"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341627912" target="_blank">
+        <div class="card-title">DeepSeek：高效创作脚本文案</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="DeepSeek">DeepSeek</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="" data-scenes="video motion"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=355116072" target="_blank">
+        <div class="card-title">AI 提效——生成片头动画</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <span class="spill motion">动效设计</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="" data-scenes="video"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364604682" target="_blank">
+        <div class="card-title">AI 提效——3 步生成背景图片</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="" data-scenes="video batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364605212" target="_blank">
+        <div class="card-title">AI 视频提效工具插件</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <span class="spill batch">批量提效</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="Skill" data-scenes="video dev prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367922013" target="_blank">
+        <div class="card-title">调用 Skills 生成视频提示词</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <span class="spill dev">插件/开发</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Skill">Skill</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="video" data-tools="Skill" data-scenes="video dev batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367931587" target="_blank">
+        <div class="card-title">用 AI Skill 自动剪视频</div>
+        <div class="pill-row">
+          <span class="spill video">视频/脚本</span>
+          <span class="spill dev">插件/开发</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Skill">Skill</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ③ Figma 教程 -->
+  <section class="section" data-section="figma">
+    <div class="section-header">
+      <div class="section-icon" style="background:#f0fdf4">✏️</div>
+      <div class="section-title">Figma 教程</div>
+      <span class="section-count">46 篇</span>
+      <a class="section-link" href="https://wiki.dxy.net/pages/viewpage.action?pageId=341624284" target="_blank">查看原始目录 →</a>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" data-cat="figma" data-tools="Figma" data-scenes="batch dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=344890043" target="_blank">
+        <div class="card-title">Figma：2025 新功能教程</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="table dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=338310628" target="_blank">
+        <div class="card-title">Figma：表格自动生成插件工具</div>
+        <div class="pill-row">
+          <span class="spill table">表格/数据</span>
+          <span class="spill dev">插件/开发</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <!-- ★ 实用插件集合 展开为 29 个独立插件卡片 ★ -->
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">快切（QuikCut）：一键切图交付</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Fill Rule Editor：调整 SVG 填充规则</div>
+        <div class="pill-row"><span class="spill dev">插件/开发</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Skew 360°：做斜切效果</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="table dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Flow Chart：画流程图</div>
+        <div class="pill-row"><span class="spill table">表格/数据</span><span class="spill dev">插件/开发</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Isometric：2.5D 图形和文字</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="typo batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Quickly Change Fonts：批量替换文字</div>
+        <div class="pill-row"><span class="spill typo">字体/排版</span><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="portrait batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Remove BG：智能一键抠图</div>
+        <div class="pill-row"><span class="spill portrait">人像处理</span><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Auto Arrange Frames：图层自动排序</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">批量重命名 Frames（⌘R）</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Autoflow：自动连接 Frames 生成流程线</div>
+        <div class="pill-row"><span class="spill dev">插件/开发</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Vector to 3D：矢量图标一键立体化</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">3D Vector：自动生成可编辑 3D 效果</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Vectary 3D Elements：3D 素材库</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Sharp 3D：矢量图转 3D</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Annotate Design：标注切图交付</div>
+        <div class="pill-row"><span class="spill dev">插件/开发</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Looper Legacy：迷幻曲线纹理生成</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Get Waves：一键生成流线曲线背景</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="typo"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">ARC：弯曲文字排版</div>
+        <div class="pill-row"><span class="spill typo">字体/排版</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">To Path：对象沿路径排列</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Image Compressor：导出并压缩图片</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="table"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">VChart：画数据图表</div>
+        <div class="pill-row"><span class="spill table">表格/数据</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Image Tracer：位图转矢量</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://codia.ai/" target="_blank">
+        <div class="card-title">Codia AI Psd2Figma：PSD 转 Figma</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Quick Hues：多图层一起调色</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="kv"
+         href="https://www.figma.com/community/plugin/1265621394579891106/filter-effect" target="_blank">
+        <div class="card-title">Filter &amp; Effect：一键滤镜调色</div>
+        <div class="pill-row"><span class="spill kv">主视觉/KV</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Canned Style：样式库管理</div>
+        <div class="pill-row"><span class="spill dev">插件/开发</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Photopea：在 Figma 里像 PS 一样处理位图</div>
+        <div class="pill-row"><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="table batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Google Sheets Sync：Excel 数据批量导入设计稿</div>
+        <div class="pill-row"><span class="spill table">表格/数据</span><span class="spill batch">批量提效</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="research"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=315142323" target="_blank">
+        <div class="card-title">Clueify：设计可用性测试</div>
+        <div class="pill-row"><span class="spill research">用户研究</span><div class="divider"></div><span class="tpill" data-t="Figma插件">Figma 插件</span></div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma" data-scenes="prompt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341638912" target="_blank">
+        <div class="card-title">Figma：AI 创建 / 编辑图片</div>
+        <div class="pill-row">
+          <span class="spill prompt">创意生图提示词</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Buzz Figma" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=344889975" target="_blank">
+        <div class="card-title">Figma Buzz：批量生成物料</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma Buzz">Figma Buzz</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Buzz Figma" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=344903400" target="_blank">
+        <div class="card-title">Figma Buzz：批量替换文本与图片</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma Buzz">Figma Buzz</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="FigJam" data-scenes="research"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=344910104" target="_blank">
+        <div class="card-title">FigJam：AI 脑暴</div>
+        <div class="pill-row">
+          <span class="spill research">用户研究</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="FigJam">FigJam</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="ppt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=348270477" target="_blank">
+        <div class="card-title">Figma：PPT 设计 / 导出插件</div>
+        <div class="pill-row">
+          <span class="spill ppt">PPT/演示</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="table"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=351396594" target="_blank">
+        <div class="card-title">Figma：实用图表生成插件</div>
+        <div class="pill-row">
+          <span class="spill table">表格/数据</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma" data-scenes="table batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364578656" target="_blank">
+        <div class="card-title">Figma：表格设计提效</div>
+        <div class="pill-row">
+          <span class="spill table">表格/数据</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364578674" target="_blank">
+        <div class="card-title">Figma 文件转换 PSD 格式教程</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma" data-scenes="typo batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364578687" target="_blank">
+        <div class="card-title">Figma 处理印刷物料经验分享</div>
+        <div class="pill-row">
+          <span class="spill typo">字体/排版</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma" data-scenes="dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364597132" target="_blank">
+        <div class="card-title">Figma：PC 变体组件升级</div>
+        <div class="pill-row">
+          <span class="spill dev">插件/开发</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="table dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367926184" target="_blank">
+        <div class="card-title">2026：文本表格设计插件 Text Table Design</div>
+        <div class="pill-row">
+          <span class="spill table">表格/数据</span>
+          <span class="spill dev">插件/开发</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="dev batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367928763" target="_blank">
+        <div class="card-title">Web to Figma：网页转设计稿插件</div>
+        <div class="pill-row">
+          <span class="spill dev">插件/开发</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="typo batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367928829" target="_blank">
+        <div class="card-title">AI 生成插件：快速批量替换字体</div>
+        <div class="pill-row">
+          <span class="spill typo">字体/排版</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Figma Figma插件" data-scenes="dev"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367934085" target="_blank">
+        <div class="card-title">Vibe Coding：从 0 到 1 制作 Figma 插件</div>
+        <div class="pill-row">
+          <span class="spill dev">插件/开发</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="VibeCoding">Vibe Coding</span>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="figma" data-tools="Claude Figma Skill" data-scenes="dev batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367934969" target="_blank">
+        <div class="card-title">Claude：训练诊疗流程图绘制 Skill</div>
+        <div class="pill-row">
+          <span class="spill dev">插件/开发</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Claude">Claude</span>
+          <span class="tpill" data-t="Skill">Skill</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ④ AI 产品体验 -->
+  <section class="section" data-section="product">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fdf2f8">💡</div>
+      <div class="section-title">AI 产品体验</div>
+      <span class="section-count">11 篇</span>
+      <a class="section-link" href="https://wiki.dxy.net/pages/viewpage.action?pageId=341627786" target="_blank">查看原始目录 →</a>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" data-cat="product" data-tools="NoteBookLM" data-scenes="ppt"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364605905" target="_blank">
+        <div class="card-title">NoteBookLM 智能输出「指南解读 AI PPT」流程</div>
+        <div class="pill-row">
+          <span class="spill ppt">PPT/演示</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="NoteBookLM">NoteBookLM</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="Figma Figma插件" data-scenes="dev batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364606820" target="_blank">
+        <div class="card-title">插件提效：快速把已上线网页转成 Figma 设计稿</div>
+        <div class="pill-row">
+          <span class="spill dev">插件/开发</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="DeepSeek" data-scenes="research"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341629231" target="_blank">
+        <div class="card-title">Deepseek：AI 模拟用户测试，验证产品功能工作流</div>
+        <div class="pill-row">
+          <span class="spill research">用户研究</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="DeepSeek">DeepSeek</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="DeepSeek" data-scenes="table"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=338313356" target="_blank">
+        <div class="card-title">DeepSeek：辅助写 SQL</div>
+        <div class="pill-row">
+          <span class="spill table">表格/数据</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="DeepSeek">DeepSeek</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="Jitter Lottie" data-scenes="motion"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341628612" target="_blank">
+        <div class="card-title">Jitter & Lottie：UI 设计常用动效速成指南</div>
+        <div class="pill-row">
+          <span class="spill motion">动效设计</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Jitter">Jitter</span>
+          <span class="tpill" data-t="Lottie">Lottie</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341628590" target="_blank">
+        <div class="card-title">UI 验收：提效工具应用</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="飞书" data-scenes="research table"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341627773" target="_blank">
+        <div class="card-title">飞书多维表格：用户评论分析</div>
+        <div class="pill-row">
+          <span class="spill research">用户研究</span>
+          <span class="spill table">表格/数据</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="飞书">飞书</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="扣子" data-scenes="research"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341635256" target="_blank">
+        <div class="card-title">扣子空间：用户研究专家</div>
+        <div class="pill-row">
+          <span class="spill research">用户研究</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="扣子">扣子 (Coze)</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="通义" data-scenes="research"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=341634074" target="_blank">
+        <div class="card-title">通义：访谈记录、智能总结工具</div>
+        <div class="pill-row">
+          <span class="spill research">用户研究</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="通义">通义</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="Figma Figma插件" data-scenes="dev table"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=344912909" target="_blank">
+        <div class="card-title">用 AI 编程做 Figma 插件——Excel 表格导入</div>
+        <div class="pill-row">
+          <span class="spill dev">插件/开发</span>
+          <span class="spill table">表格/数据</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Figma插件">Figma 插件</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+      <a class="card" data-cat="product" data-tools="Claude Pencil Figma" data-scenes="batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=367937789" target="_blank">
+        <div class="card-title">Pencil 使用教程：手把手教你 vibe designing</div>
+        <div class="pill-row">
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="Claude">Claude</span>
+          <span class="tpill" data-t="Pencil">Pencil</span>
+          <span class="tpill" data-t="Figma">Figma</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ⑤ 视觉提效工具/插件 -->
+  <section class="section" data-section="plugin">
+    <div class="section-header">
+      <div class="section-icon" style="background:#f0fdfa">🔧</div>
+      <div class="section-title">视觉提效工具 / 插件</div>
+      <span class="section-count">1 篇</span>
+      <a class="section-link" href="https://wiki.dxy.net/pages/viewpage.action?pageId=364605786" target="_blank">查看原始目录 →</a>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" data-cat="plugin" data-tools="AE" data-scenes="motion batch"
+         href="https://wiki.dxy.net/pages/viewpage.action?pageId=364605935" target="_blank">
+        <div class="card-title">AI 辅助 AE 动效——及 GIF 压缩插件</div>
+        <div class="pill-row">
+          <span class="spill motion">动效设计</span>
+          <span class="spill batch">批量提效</span>
+          <div class="divider"></div>
+          <span class="tpill" data-t="AE">AE</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </a>
+
+    </div>
+  </section>
+
+  <div id="empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+    <svg width="40" height="40" fill="none" stroke="#d1d5db" stroke-width="1.5" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <p style="margin-top:12px;font-size:14px">没有找到相关教程，换个关键词或筛选条件试试？</p>
+  </div>
+
+</main>
+
+<footer>TDDC 设计团队 · AI 提效教程导航 · 数据来源：丁香园 wiki · 2026-03</footer>
+
+<script>
+  const search      = document.getElementById('search');
+  const sceneChips  = document.querySelectorAll('#scene-chips .chip');
+  const toolChips   = document.querySelectorAll('#tool-chips .chip');
+  const cards       = document.querySelectorAll('.card');
+  const sections    = document.querySelectorAll('.section');
+  const empty       = document.getElementById('empty');
+  const badge       = document.getElementById('count-badge');
+
+  let curScene = '';
+  let curTool  = '';
+  let curQ     = '';
+
+  function update() {
+    let n = 0;
+    cards.forEach(c => {
+      const tools  = ' ' + (c.dataset.tools  || '').toLowerCase() + ' ';
+      const scenes = ' ' + (c.dataset.scenes || '').toLowerCase() + ' ';
+      const title  = c.querySelector('.card-title').textContent.toLowerCase();
+      const pills  = Array.from(c.querySelectorAll('.spill,.tpill')).map(t=>t.textContent).join(' ').toLowerCase();
+      const all    = title + pills + tools + scenes;
+
+      const sceneOk = !curScene || scenes.includes(' ' + curScene.toLowerCase() + ' ');
+      const toolOk  = !curTool  || tools.includes(' ' + curTool.toLowerCase() + ' ');
+      const qOk     = !curQ     || all.includes(curQ.toLowerCase());
+
+      const show = sceneOk && toolOk && qOk;
+      c.classList.toggle('hidden', !show);
+      if (show) n++;
+    });
+
+    sections.forEach(s => {
+      const hasCards = s.querySelectorAll('.card:not(.hidden)').length > 0;
+      s.classList.toggle('hidden', !hasCards);
+    });
+
+    empty.style.display = n === 0 ? 'block' : 'none';
+    badge.textContent   = `找到 ${n} 条`;
+  }
+
+  // 场景筛选（可取消）
+  sceneChips.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isActive = btn.classList.contains('active');
+      sceneChips.forEach(b => b.classList.remove('active'));
+      toolChips.forEach(b => b.classList.remove('active'));
+      curTool = '';
+      if (!isActive) { btn.classList.add('active'); curScene = btn.dataset.scene; }
+      else curScene = '';
+      update();
+    });
+  });
+
+  // 工具筛选（可取消）
+  toolChips.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isActive = btn.classList.contains('active');
+      toolChips.forEach(b => b.classList.remove('active'));
+      sceneChips.forEach(b => b.classList.remove('active'));
+      curScene = '';
+      if (!isActive) { btn.classList.add('active'); curTool = btn.dataset.tool; }
+      else curTool = '';
+      update();
+    });
+  });
+
+  // 搜索
+  search.addEventListener('input', e => {
+    curQ = e.target.value.trim();
+    update();
+  });
+</script>
+</body>
+</html>
