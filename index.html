@@ -24,35 +24,64 @@
     .stat .num { font-size: 24px; font-weight: 700; }
     .stat .label { font-size: 11px; opacity: .8; }
 
-    /* TOOLBAR */
-    .toolbar { background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
-    .toolbar-row { display: flex; align-items: center; gap: 12px; padding: 14px 40px; flex-wrap: wrap; }
-    .toolbar-row + .toolbar-row { padding-top: 12px; padding-bottom: 14px; border-top: 1px solid var(--border); }
-    .row-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .5px; white-space: nowrap; min-width: 36px; }
-    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
-    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-    #search { width: 100%; padding: 9px 12px 9px 36px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; outline: none; transition: border-color .2s; background: var(--bg); color: var(--text); }
-    #search:focus { border-color: var(--primary); background: #fff; }
-    .chip-group { display: flex; gap: 7px; flex-wrap: wrap; }
-    .chip { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 13px; cursor: pointer; color: var(--muted); transition: all .15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
-    .chip:hover { border-color: var(--primary); color: var(--primary); }
-    .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
-    .chip[data-scene="kv"].active      { background:#7c3aed; border-color:#7c3aed; }
-    .chip[data-scene="portrait"].active{ background:#be185d; border-color:#be185d; }
-    .chip[data-scene="arch"].active    { background:#b45309; border-color:#b45309; }
-    .chip[data-scene="typo"].active    { background:#0369a1; border-color:#0369a1; }
-    .chip[data-scene="ppt"].active     { background:#0891b2; border-color:#0891b2; }
-    .chip[data-scene="video"].active   { background:#dc2626; border-color:#dc2626; }
-    .chip[data-scene="prompt"].active  { background:#7c3aed; border-color:#7c3aed; }
-    .chip[data-scene="research"].active{ background:#059669; border-color:#059669; }
-    .chip[data-scene="table"].active   { background:#0d9488; border-color:#0d9488; }
-    .chip[data-scene="motion"].active  { background:#9333ea; border-color:#9333ea; }
-    .chip[data-scene="batch"].active   { background:#d97706; border-color:#d97706; }
-    .chip[data-scene="dev"].active     { background:#374151; border-color:#374151; }
-    .count-badge { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
+    /* ── 双栏布局 ── */
+    .layout { display: flex; align-items: flex-start; min-height: calc(100vh - 200px); }
 
-    /* MAIN */
-    main { max-width: 1200px; margin: 0 auto; padding: 28px 36px 60px; }
+    /* ── 左侧边栏 ── */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: var(--card); border-right: 1px solid var(--border);
+      padding: 20px 14px 40px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .search-wrap { position: relative; margin-bottom: 4px; }
+    .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    #search { width: 100%; padding: 8px 10px 8px 32px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 13px; outline: none; transition: border-color .2s; background: var(--bg); color: var(--text); font-family: inherit; }
+    #search:focus { border-color: var(--primary); background: #fff; }
+    .count-badge { font-size: 11px; color: var(--muted); padding: 0 2px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .filter-section { margin-top: 8px; }
+    .filter-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .6px; text-transform: uppercase; padding: 0 8px; margin-bottom: 4px; display: block; }
+    .chip-group { display: flex; flex-direction: column; gap: 1px; }
+    .chip {
+      width: 100%; text-align: left; display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 10px; border-radius: 7px; border: none; background: transparent;
+      font-size: 12.5px; cursor: pointer; color: var(--text); transition: all .12s;
+      font-family: inherit;
+    }
+    .chip:hover { background: var(--bg); color: var(--primary); }
+    .chip .chip-count { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .chip.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+    .chip.active .chip-count { color: var(--primary); opacity: .7; }
+    /* 场景激活色 */
+    .chip[data-scene="kv"].active       { background:#f5f3ff; color:#7c3aed; }
+    .chip[data-scene="kv"].active .chip-count { color:#7c3aed; }
+    .chip[data-scene="portrait"].active { background:#fdf2f8; color:#be185d; }
+    .chip[data-scene="portrait"].active .chip-count { color:#be185d; }
+    .chip[data-scene="arch"].active     { background:#fffbeb; color:#b45309; }
+    .chip[data-scene="arch"].active .chip-count { color:#b45309; }
+    .chip[data-scene="typo"].active     { background:#eff6ff; color:#0369a1; }
+    .chip[data-scene="typo"].active .chip-count { color:#0369a1; }
+    .chip[data-scene="ppt"].active      { background:#ecfeff; color:#0891b2; }
+    .chip[data-scene="ppt"].active .chip-count { color:#0891b2; }
+    .chip[data-scene="video"].active    { background:#fff1f2; color:#be123c; }
+    .chip[data-scene="video"].active .chip-count { color:#be123c; }
+    .chip[data-scene="prompt"].active   { background:#faf5ff; color:#7c3aed; }
+    .chip[data-scene="prompt"].active .chip-count { color:#7c3aed; }
+    .chip[data-scene="research"].active { background:#f0fdf4; color:#059669; }
+    .chip[data-scene="research"].active .chip-count { color:#059669; }
+    .chip[data-scene="table"].active    { background:#f0fdfa; color:#0d9488; }
+    .chip[data-scene="table"].active .chip-count { color:#0d9488; }
+    .chip[data-scene="motion"].active   { background:#fdf4ff; color:#9333ea; }
+    .chip[data-scene="motion"].active .chip-count { color:#9333ea; }
+    .chip[data-scene="batch"].active    { background:#fffbeb; color:#d97706; }
+    .chip[data-scene="batch"].active .chip-count { color:#d97706; }
+    .chip[data-scene="dev"].active      { background:#f3f4f6; color:#374151; }
+    .chip[data-scene="dev"].active .chip-count { color:#374151; }
+
+    /* ── 右侧内容区 ── */
+    .content-area { flex: 1; min-width: 0; padding: 28px 32px 60px; max-width: 100%; }
     .section { margin-bottom: 44px; }
     .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
     .section-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
@@ -61,8 +90,8 @@
     .section-link { margin-left: auto; font-size: 12px; color: var(--primary); text-decoration: none; }
     .section-link:hover { text-decoration: underline; }
 
-    /* CARDS */
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); gap: 11px; }
+    /* ── 卡片 ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
     .card { background: var(--card); border-radius: var(--radius); border: 1.5px solid var(--border); padding: 14px 16px; transition: all .18s; text-decoration: none; display: flex; flex-direction: column; gap: 9px; position: relative; }
     .card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
     .card-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.45; padding-right: 14px; }
@@ -87,7 +116,19 @@
     .card.hidden, .section.hidden { display: none; }
     #empty { display: none; text-align: center; padding: 60px 20px; color: var(--muted); }
     footer { text-align: center; padding: 20px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); }
-    @media (max-width: 640px) { header { padding: 28px 16px; } .toolbar-row { padding: 9px 14px; } main { padding: 16px 12px 40px; } }
+
+    /* ── 移动端：侧边栏折叠 ── */
+    @media (max-width: 768px) {
+      header { padding: 28px 16px 20px; }
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; overflow-x: auto; padding: 10px 14px; border-right: none; border-bottom: 1px solid var(--border); gap: 8px; }
+      .filter-section { display: flex; align-items: center; gap: 6px; }
+      .filter-label { white-space: nowrap; margin-bottom: 0; }
+      .chip-group { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
+      .chip { width: auto; white-space: nowrap; padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 20px; }
+      .count-badge { border-bottom: none; }
+      .content-area { padding: 16px 14px 40px; }
+    }
   </style>
 </head>
 <body>
@@ -99,32 +140,31 @@
   <div class="stats" id="header-stats"></div>
 </header>
 
-<div class="toolbar">
-  <div class="toolbar-row">
+<div class="layout">
+  <aside class="sidebar">
     <div class="search-wrap">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search" type="search" placeholder="搜索关键词、工具、场景…" />
     </div>
     <div class="count-badge" id="count-badge"></div>
-  </div>
-  <div class="toolbar-row">
-    <span class="row-label">场景</span>
-    <div class="chip-group" id="scene-chips"></div>
-  </div>
-  <div class="toolbar-row">
-    <span class="row-label">工具</span>
-    <div class="chip-group" id="tool-chips"></div>
+    <div class="filter-section">
+      <span class="filter-label">场景</span>
+      <div class="chip-group" id="scene-chips"></div>
+    </div>
+    <div class="filter-section">
+      <span class="filter-label">工具</span>
+      <div class="chip-group" id="tool-chips"></div>
+    </div>
+  </aside>
+  <div class="content-area">
+    <main id="main-content"></main>
+    <div id="empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+      <svg width="40" height="40" fill="none" stroke="#d1d5db" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p style="margin-top:12px;font-size:14px">没有找到相关教程，换个关键词或筛选条件试试？</p>
+    </div>
+    <footer>TDDC 设计团队 · AI 提效教程导航 · 数据来源：丁香园 wiki</footer>
   </div>
 </div>
-
-<main id="main-content"></main>
-
-<div id="empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
-  <svg width="40" height="40" fill="none" stroke="#d1d5db" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-  <p style="margin-top:12px;font-size:14px">没有找到相关教程，换个关键词或筛选条件试试？</p>
-</div>
-
-<footer>TDDC 设计团队 · AI 提效教程导航 · 数据来源：丁香园 wiki</footer>
 
 <script>
 // ╔══════════════════════════════════════════════════════════════════╗
